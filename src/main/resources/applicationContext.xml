@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <!--读取db.properties -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <!--数据库配置交个Spring管理-->
+    <!-- 配置数据源 dbcp -->
+<!--    <bean id="dataSource"
+          class="org.apache.commons.dbcp2.BasicDataSource">-->
+    <!--配置数据源ali-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <!--数据库驱动 -->
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <!--连接数据库的url -->
+        <property name="url" value="${jdbc.url}" />
+        <!--连接数据库的用户名 -->
+        <property name="username" value="${jdbc.username}" />
+        <!--连接数据库的密码 -->
+        <property name="password" value="${jdbc.password}" />
+        <!--最大并发连接数 -->
+        <property name="maxActive" value="${jdbc.maxTotal}" />
+        <!--最小空闲连接  -->
+        <property name="minIdle" value="${jdbc.maxIdle}" />
+        <!--初始化连接数  -->
+        <property name="initialSize" value="${jdbc.initialSize}" />
+    </bean>
+
+    <!--配置MyBatis工厂 -->
+    <bean id="sqlSessionFactory"
+          class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--注入数据源 -->
+        <property name="dataSource" ref="dataSource" />
+        <!--指定核心配置文件位置 -->
+        <property name="configLocation" value="classpath:mybatis.xml"/>
+    </bean>
+
+    <!-- Dao来发 后面使用注解就不需要配置了
+          将指定类配置给Spring，让Spring创建其对象的实例 -->
+    <bean id="customerDao" class="ssm.dao.imp.CustomerDaoImp" >
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+    </bean>
+
+
+
+    <!-- Mapper扫描开发 推荐使用（基于MapperScannerConfigurer）自动扫描包下面的所有Mapper，当出现多个Mapper时，不用多次书写bean -->
+    <bean  id="beanMapper" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="ssm.mapper" />
+    </bean>
+<!--    &lt;!&ndash; Mapper代理的方式开发方式一，配置Mapper代理对象，生成mapper实现类的工厂 &ndash;&gt;
+    <bean id="CustomerMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        &lt;!&ndash; 注入sqlSessionFactory &ndash;&gt;
+        <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+        &lt;!&ndash; 配置Mapper接口 &ndash;&gt;
+        <property name="mapperInterface" value="ssm.mapper.CustomerMapper" />
+    </bean>-->
+
+    <!-- 事务管理器，依赖于数据源 -->
+    <bean id="transactionManager" class=
+            "org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <!-- 通知 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!-- 传播行为 -->
+            <tx:method name="save*" propagation="REQUIRED" />
+            <tx:method name="insert*" propagation="REQUIRED" />
+            <tx:method name="add*" propagation="REQUIRED" />
+            <tx:method name="create*" propagation="REQUIRED" />
+            <tx:method name="delete*" propagation="REQUIRED" />
+            <tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+            <tx:method name="select*" propagation="SUPPORTS" read-only="true" />
+            <tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+    <!-- 切面 -->
+    <aop:config>
+        <aop:advisor advice-ref="txAdvice"
+                     pointcut="execution(* ssm.service.*.*(..))" />
+    </aop:config>
+    <!--开启事务注解 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+    <!-- 扫描包加载Service实现类 -->
+    <context:component-scan base-package="ssm.service"></context:component-scan>
+
+</beans>

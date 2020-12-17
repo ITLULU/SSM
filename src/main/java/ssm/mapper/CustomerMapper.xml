@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace表示命名空间 -->
+<mapper namespace="ssm.mapper.CustomerMapper">
+    <!-- 1 .<if>元素使用 根据条件查询 -->
+    <select id="findCustomerByNameAndJobsWithIf" parameterType="ssm.pojo.Customer"
+            resultType="ssm.pojo.Customer">
+        select * from t_customer where 1=1
+        <if test="username !=null and username !=''">
+            and username like concat('%',#{username}, '%')
+        </if>
+        <if test="jobs !=null and jobs !=''">
+            and jobs= #{jobs}
+        </if>
+    </select>
+    <!-- 2.<where>元素使用 根据条件查询 -->
+    <select id="findCustomerByNameAndJobsWithWhere" parameterType="ssm.pojo.Customer"
+            resultType="ssm.pojo.Customer">
+        select * from t_customer
+        <where>
+            <if test="username !=null and username !=''">
+                and username like concat('%',#{username},'%')
+            </if>
+            <if test="jobs !=null and jobs !=''">
+                and jobs= #{jobs}
+            </if>
+        </where>
+    </select>
+    <!-- 3. <trim>元素 -->
+    <select id="findCustomerByNameAndJobs" parameterType="ssm.pojo.Customer"
+            resultType="ssm.pojo.Customer">
+        select * from t_customer
+        <trim prefix="where" prefixOverrides="and">
+            <if test="username !=null and username !=''">
+                and username like concat('%',#{username}, '%')
+            </if>
+            <if test="jobs !=null and jobs !=''">
+                and jobs= #{jobs}
+            </if>
+        </trim>
+    </select>
+    <!--4. <choose>(<when>、<otherwise>)元素使用 -->
+    <select id="findCustomerByNameOrJobsWithChoose" parameterType="ssm.pojo.Customer"
+            resultType="ssm.pojo.Customer">
+        select * from t_customer where 1=1
+        <choose>
+            <when test="username !=null and username !=''">
+                and username like concat('%',#{username}, '%')
+            </when>
+            <when test="jobs !=null and jobs !=''">
+                and jobs= #{jobs}
+            </when>
+            <otherwise>
+                and phone is not null
+            </otherwise>
+        </choose>
+    </select>
+    <!--5.根据客户名模糊查询客户信息列表  常规影像查询 -->
+    <select id="findCustomerByName" parameterType="String"
+            resultType="ssm.pojo.Customer">
+		select * from t_customer where username like '%${value}%'
+	</select>
+    <!-- 6.根据客户名模糊查询客户信息列表  bind使用-->
+    <select id="findCustomerByNameWithBind" parameterType="ssm.pojo.Customer"
+            resultType="ssm.pojo.Customer">
+        <!--_parameter.getUsername()也可直接写成传入的字段属性名，即username -->
+      <!--  <bind name="pattern_username" value="'%'+_parameter.getUsername()+'%'" />-->
+        <bind name="username" value="username" />
+        select * from t_customer
+        where
+        username like #{username}
+    </select>
+
+    <!-- 7.添加客户信息 -->
+    <insert id="addCustomer" parameterType="ssm.pojo.Customer"
+            keyProperty="id" useGeneratedKeys="true">
+		insert into t_customer(username,jobs,phone)
+		values(#{username},#{jobs},#{phone})
+	</insert>
+    <!-- 对于不支持自动生成主键的数据库，或取消自主增长规则的数据库可以自定义主键生成规则 -->
+    <insert id="insertCustomer" parameterType="ssm.pojo.Customer">
+        <selectKey keyProperty="id" resultType="Integer" order="BEFORE">
+            select if(max(id) is null, 1, max(id) +1) as newId from t_customer
+        </selectKey>
+        insert into t_customer(id,username,jobs,phone)
+        values(#{id},#{username},#{jobs},#{phone})
+    </insert>
+
+    <!--<foreach>元素使用 -->
+    <select id="findCustomerByIds" parameterType="List"
+            resultType="ssm.pojo.Customer">
+        select * from t_customer where id in
+        <foreach item="id" index="index" collection="list" open="("
+                 separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+
+    <!-- 4.更新客户信息 -->
+    <update id="updateCustomer" parameterType="ssm.pojo.Customer">
+		update t_customer
+		set username=#{username},jobs=#{jobs},phone=#{phone}
+		where id=#{id}
+	</update>
+    <!--update 更新字段 set-->
+    <!-- <set>元素 -->
+    <update id="updateCustomerWithSet" parameterType="ssm.pojo.Customer">
+        update t_customer
+        <set>
+            <if test="username !=null and username !=''">
+                username=#{username},
+            </if>
+            <if test="jobs !=null and jobs !=''">
+                jobs=#{jobs},
+            </if>
+            <if test="phone !=null and phone !=''">
+                phone=#{phone},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <!-- 5.删除客户信息 -->
+    <delete id="deleteCustomer" parameterType="Integer">
+		delete from t_customer where id=#{id}
+	</delete>
+
+    <!--定义代码片段 -->
+    <!--	<sql id="customerColumns">id,username,jobs,phone</sql>
+        <select id="findCustomerById" parameterType="Integer"
+            resultType="ssm.pojo.Customer">
+            select <include refid="customerColumns"/>
+            from t_customer
+            where id = #{id}
+        </select> -->
+
+    <!--定义表的前缀名 -->
+    <sql id="tablename">
+		${prefix}customer
+	</sql>
+    <!--定义要查询的表 -->
+    <sql id="include_content">
+        from
+        <include refid="${include_target}"/>
+    </sql>
+    <!--定义查询列 -->
+    <sql id="customerColumns">
+	   id,username,jobs,phone
+	</sql>
+    <!--根据id查询客户信息 -->
+    <select id="findCustomerById" parameterType="Integer"
+            resultType="ssm.pojo.Customer">
+        select
+        <include refid="customerColumns"/>
+        <include refid="include_content">
+            <property name="prefix" value="t_"/>
+            <property name="include_target" value="tablename"/>
+        </include>
+        where id = #{id}
+    </select>
+
+
+    <!--一对多映射  嵌套结果-->
+    <!-- 一对多：查看某一用户及其关联的订单信息
+             注意：当关联查询出的列名相同，则需要使用别名区分 -->
+    <select id="findCustomerWithOrders" parameterType="int"
+            resultMap="findPersonWithOrdersResult">
+		SELECT t.*,o.id as ordersid,o.number
+		from t_customer t,t_orders o
+		WHERE t.id = o.customer_id
+        and t.id = #{id}
+	</select>
+    <resultMap type="ssm.pojo.Customer" id="findPersonWithOrdersResult">
+        <id property="id" column="id" />
+        <result property="username" column="username"/>
+        <result property="jobs" column="jobs"/>
+        <result property="phone" column="phone"/>
+        <!--一对多  查询方式-->
+        <!-- 一对多关联映射：collection
+            ofType表示属性集合中元素的类型，List<Orders>属性即Orders类 column 对应的是表的字段名称 -->
+        <collection property="ordersList" ofType="ssm.pojo.Orders">
+            <id property="id" column="ordersid"/>
+            <result property="number" column="number"/>
+        </collection>
+    </resultMap>
+    <!--  一对多 嵌套 查询 -->
+    <select id="findCustomerWithOrders2" parameterType="int"
+            resultMap="findPersonWithOrdersResult2">
+		SELECT t.*
+		from t_customer t
+		WHERE  t.id = #{id}
+	</select>
+    <resultMap type="ssm.pojo.Customer" id="findPersonWithOrdersResult2">
+        <id property="id" column="id" />
+        <result property="username" column="username"/>
+        <result property="jobs" column="jobs"/>
+        <result property="phone" column="phone"/>
+        <!--一对多  查询方式-->
+        <!-- 一对多关联映射：collection  ofType表示属性集合中元素的类型，
+                   List<Orders>属性即Orders类 column 对应的是表的字段名称 -->
+        <collection property="ordersList" ofType="ssm.pojo.Orders" column="id" select="ssm.mapper.OrdersMapper.findOrdersByCustomerId">
+        </collection>
+    </resultMap>
+</mapper>

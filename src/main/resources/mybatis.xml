@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--MyBatis读取数据配置文件-->
+ <!--   <properties resource="jdbc.properties" />-->
+    <!-- 定义别名 -->
+    <!--<typeAliases>
+        <package name="ssm.pojo" />
+    </typeAliases>-->
+    <!-- 打开延迟加载的开关 -->
+    <settings>
+        <!-- 打开延迟加载的开关 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!-- 将积极加载改为消极加载，即延迟加载 -->
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <!-- 开启二级缓存 -->
+        <setting name="cacheEnabled" value="true"/>
+
+    </settings>
+
+
+    <!--1.配置环境 ，默认的环境id为mysql -->
+  <!--  <environments default="development">
+        &lt;!&ndash;1.2.配置id为mysql的数据库环境 &ndash;&gt;
+        <environment id="development">
+            &lt;!&ndash; 使用JDBC的事务管理 &ndash;&gt;
+            <transactionManager type="JDBC" />
+            &lt;!&ndash;数据库连接池 &ndash;&gt;
+            <dataSource type="POOLED">
+                &lt;!&ndash; 数据库驱动 &ndash;&gt;
+                <property name="driver" value="com.mysql.jdbc.Driver" />
+                &lt;!&ndash; 连接数据库的url &ndash;&gt;
+                <property name="url" value="${jdbc.url}" />
+                &lt;!&ndash; 连接数据库的用户名 &ndash;&gt;
+                <property name="username" value="${jdbc.username}" />
+                &lt;!&ndash; 连接数据库的密码 &ndash;&gt;
+                <property name="password" value="${jdbc.password}" />
+            </dataSource>
+        </environment>
+    </environments>
+-->
+    <!--2.配置Mapper的位置 -->
+    <mappers>
+        <mapper resource="ssm/mapper/UserMapper.xml"/>
+        <mapper resource="ssm/mapper/CustomerMapper.xml"/>
+        <mapper resource="ssm/mapper/PersonMapper.xml"/>
+        <mapper resource="ssm/mapper/IdCardMapper.xml"/>
+        <mapper resource="ssm/mapper/OrdersMapper.xml"/>
+        <mapper resource="ssm/mapper/ProductMapper.xml"/>
+    </mappers>
+</configuration>

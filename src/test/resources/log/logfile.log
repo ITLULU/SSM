@@ -1,0 +1,5 @@
+2020-12-17 16:35:13 [ main:1327 ] - [ INFO ] com.alibaba.druid.pool.DruidDataSource.init(DruidDataSource.java:930) {dataSource-1} inited
+2020-12-17 16:37:47 [ main:1382 ] - [ INFO ] com.alibaba.druid.pool.DruidDataSource.init(DruidDataSource.java:930) {dataSource-1} inited
+2020-12-17 17:15:53 [ main:1372 ] - [ INFO ] com.alibaba.druid.pool.DruidDataSource.init(DruidDataSource.java:930) {dataSource-1} inited
+2020-12-17 17:16:11 [ main:1489 ] - [ INFO ] com.alibaba.druid.pool.DruidDataSource.init(DruidDataSource.java:930) {dataSource-1} inited
+2020-12-17 17:17:33 [ main:1630 ] - [ INFO ] com.alibaba.druid.pool.DruidDataSource.init(DruidDataSource.java:930) {dataSource-1} inited
